@@ -1,0 +1,24 @@
+name: Build Exploit
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc make libmnl-dev libnftnl-dev
+    
+    - name: Build exploit
+      run: gcc -Wall -Wextra -lmnl -lnftnl exploit.c -o exploit
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: exploit-binary
+        path: exploit
