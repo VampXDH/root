@@ -1,51 +1,34 @@
-name: Build
+name: Build Exploit
 
-on: [push]
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
     - uses: actions/checkout@v3
     
-    - name: Install build tools and dependencies
+    - name: Install Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          autoconf \
-          automake \
-          libtool \
-          pkg-config \
-          libmnl-dev \
-          libnftnl-dev \
           gcc \
-          make
+          libmnl-dev \
+          libnftnl-dev
     
-    - name: Generate build files (if needed)
-      run: |
-        if [ -f autogen.sh ]; then
-          chmod +x autogen.sh
-          ./autogen.sh
-        elif [ -f configure.ac ] || [ -f Makefile.am ]; then
-          autoreconf -if
-        fi
+    - name: Build Exploit
+      run: gcc -lmnl -lnftnl exploit.c -o exploit
     
-    - name: Configure
-      run: |
-        if [ -f configure ]; then
-          ./configure
-        fi
-    
-    - name: Build
-      run: |
-        if [ -f Makefile ]; then
-          make
-        else
-          gcc -Wall -Wextra -lmnl -lnftnl exploit.c -o exploit
-        fi
-    
-    - name: Upload binary
+    - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: exploit
+        name: exploit-binary
         path: exploit
+    
+    - name: List Files
+      run: ls -la
