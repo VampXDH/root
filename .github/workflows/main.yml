@@ -1,0 +1,51 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install build tools and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          autoconf \
+          automake \
+          libtool \
+          pkg-config \
+          libmnl-dev \
+          libnftnl-dev \
+          gcc \
+          make
+    
+    - name: Generate build files (if needed)
+      run: |
+        if [ -f autogen.sh ]; then
+          chmod +x autogen.sh
+          ./autogen.sh
+        elif [ -f configure.ac ] || [ -f Makefile.am ]; then
+          autoreconf -if
+        fi
+    
+    - name: Configure
+      run: |
+        if [ -f configure ]; then
+          ./configure
+        fi
+    
+    - name: Build
+      run: |
+        if [ -f Makefile ]; then
+          make
+        else
+          gcc -Wall -Wextra -lmnl -lnftnl exploit.c -o exploit
+        fi
+    
+    - name: Upload binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: exploit
+        path: exploit
