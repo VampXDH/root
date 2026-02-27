@@ -1,34 +1,15 @@
-name: Build Exploit
+name: Build
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          gcc \
-          libmnl-dev \
-          libnftnl-dev
-    
-    - name: Build Exploit
-      run: gcc -lmnl -lnftnl exploit.c -o exploit
-    
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: exploit-binary
-        path: exploit
-    
-    - name: List Files
-      run: ls -la
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libmnl-dev libnftnl-dev
+      - run: gcc -o exploit exploit.c -lmnl -lnftnl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exploit
+          path: exploit
