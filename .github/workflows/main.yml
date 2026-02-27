@@ -1,15 +1,30 @@
-name: Build
+name: Build Exploit
 
 on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04  # Pakai Ubuntu 20.04 biar glibc lebih tua
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y libmnl-dev libnftnl-dev
-      - run: gcc -o exploit exploit.c -lmnl -lnftnl
-      - uses: actions/upload-artifact@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc \
+            libmnl-dev \
+            libnftnl-dev \
+            musl-tools  # Alternatif: pakai musl libc
+      
+      - name: Build with static linking (Option 1 - Traditional)
+        run: |
+          gcc -static -o exploit exploit.c -lmnl -lnftnl
+          echo "Static build selesai"
+          ls -lh exploit
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: exploit
+          name: exploit-static
           path: exploit
